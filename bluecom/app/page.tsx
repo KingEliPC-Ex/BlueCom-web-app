@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import "../firebase"; // your firebase init file
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
+import "./firebase"; // adjust path if needed
 
 export default function Home() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const auth = getAuth();

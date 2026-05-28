@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth, signInWithPopup, GithubAuthProvider } from "firebase/auth";
+import {
+  getAuth,
+  signInWithPopup,
+  GithubAuthProvider,
+} from "firebase/auth";
 
 // Firebase config from environment variables
 const firebaseConfig = {
@@ -15,7 +19,7 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Safe initialization (prevents double init)
+// Safe Firebase initialization
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
 const provider = new GithubAuthProvider();
@@ -25,8 +29,23 @@ export default function LoginPage() {
 
   const loginWithGithub = async () => {
     try {
-      await signInWithPopup(auth, provider);
-      window.location.href = "/"; // redirect after login
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // POST user info to your API
+      await fetch("/api/auth/callback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName,
+          photo: user.photoURL,
+        }),
+      });
+
+      // Redirect AFTER POST
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.message);
     }
